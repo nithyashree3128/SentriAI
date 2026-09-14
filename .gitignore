@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+.venv/
+venv/
+
+# Node / frontend
+node_modules/
+warden-frontend/node_modules/
+warden-frontend/dist/
+dist/
+
+# Runtime artifacts
+scan_history.json
+*.log
+
+# Editor / OS
+.DS_Store
+Thumbs.db
