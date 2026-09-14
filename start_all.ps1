@@ -1,5 +1,5 @@
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$frontendDir = Join-Path $root 'warden-frontend'
+$frontendDir = Join-Path $root 'SentriAi'
 
 Write-Host "Starting backend..."
 Start-Process powershell -ArgumentList @(
