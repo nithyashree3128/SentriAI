@@ -1,7 +1,7 @@
 import pandas as pd
 
-input_file = "dataset/SQLiV3_cleaned.csv"
-output_file = "dataset/SQLiV3_final.csv"
+input_file = "DATASET/SQLiV3_cleaned.csv"
+output_file = "DATASET/SQLiV3_final.csv"
 
 df = pd.read_csv(input_file)
 

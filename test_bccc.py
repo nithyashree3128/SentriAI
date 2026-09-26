@@ -6,7 +6,7 @@ model = joblib.load("logistic_model.pkl")
 vectorizer = joblib.load("tfidf_vectorizer.pkl")
 
 # Load BCCC dataset
-file = "dataset/BCCC-SFU-SQLInj-2023.csv"
+file = "DATASET/BCCC-SFU-SQLInj-2023.csv"
 df = pd.read_csv(file)
 
 # SQL queries

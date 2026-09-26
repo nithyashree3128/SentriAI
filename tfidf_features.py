@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 # Load dataset
-file = "dataset/SQLiV3_final.csv"
+file = "DATASET/SQLiV3_final.csv"
 df = pd.read_csv(file)
 
 # Separate input and labels

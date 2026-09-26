@@ -35,7 +35,7 @@ def rule_based_detector(query):
 
 
 # Load BCCC dataset
-df = pd.read_csv("dataset/BCCC-SFU-SQLInj-2023.csv")
+df = pd.read_csv("DATASET/BCCC-SFU-SQLInj-2023.csv")
 
 queries = df["Data"].fillna("").astype(str)
 

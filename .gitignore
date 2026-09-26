@@ -1,8 +1,17 @@
 __pycache__/
 *.pyc
 *.pkl
+*.tsbuildinfo
 .env
 .venv/
 venv/
 node_modules/
 dist/
+/DATASET/*
+!/DATASET/.gitkeep
+/dataset/*
+!/dataset/.gitkeep
+/RBSQLI/rbsqli_dataset.csv
+/RBSQLI/Rule-Based SQL Injection (RbSQLi) Dataset/*.zip
+/extra_sqli_dataset.csv
+scan_history.json

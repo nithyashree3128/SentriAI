@@ -1,6 +1,6 @@
 import pandas as pd
 
-file = "dataset/SQLiV3_cleaned.csv"
+file = "DATASET/SQLiV3_cleaned.csv"
 
 df = pd.read_csv(file)
 

@@ -1,10 +1,10 @@
 import pandas as pd
 
 # Load training dataset
-sqli = pd.read_csv("dataset/SQLiV3_final.csv")
+sqli = pd.read_csv("DATASET/SQLiV3_final.csv")
 
 # Load independent dataset
-bccc = pd.read_csv("dataset/BCCC-SFU-SQLInj-2023.csv")
+bccc = pd.read_csv("DATASET/BCCC-SFU-SQLInj-2023.csv")
 
 # Convert queries to strings and normalize whitespace
 train_queries = (

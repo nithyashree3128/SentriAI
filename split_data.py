@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 # Load final dataset
-file = "dataset/SQLiV3_final.csv"
+file = "DATASET/SQLiV3_final.csv"
 df = pd.read_csv(file)
 
 # Input and target

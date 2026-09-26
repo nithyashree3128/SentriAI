@@ -13,7 +13,7 @@ from sklearn.metrics import (
 )
 
 # 1. Load dataset
-df = pd.read_csv("dataset/SQLiV3_final.csv")
+df = pd.read_csv("DATASET/SQLiV3_final.csv")
 
 X = df["Sentence"]
 y = df["Label"]

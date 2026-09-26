@@ -6,7 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 
 # Load SQLiV3
-df = pd.read_csv("dataset/SQLiV3_final.csv")
+df = pd.read_csv("DATASET/SQLiV3_final.csv")
 
 X = df["Sentence"]
 y = df["Label"]

@@ -1,7 +1,7 @@
 import pandas as pd
 
-input_file = "dataset/SQLiV3.csv"
-output_file = "dataset/SQLiV3_cleaned.csv"
+input_file = "DATASET/SQLiV3.csv"
+output_file = "DATASET/SQLiV3_cleaned.csv"
 
 # Read everything as text
 df = pd.read_csv(input_file, dtype=str)
