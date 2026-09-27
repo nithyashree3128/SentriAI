@@ -3,7 +3,7 @@ Prevention Demo — Parameterized Queries vs. String Concatenation
 ------------------------------------------------------------------
 This script demonstrates the DIFFERENCE between detection and prevention.
 
-- detect_sql.py / hybrid_detect.py CLASSIFY a query as suspicious or not.
+- detect_sql.py CLASSIFIES a query as suspicious or not.
 - This script PREVENTS the attack from working in the first place, by
   changing how the query is built — regardless of whether it "looks"
   suspicious.
@@ -130,7 +130,7 @@ print("=" * 70)
 print("CONCLUSION")
 print("=" * 70)
 print(
-    "Detection (hybrid_detect.py) can FLAG a suspicious-looking query.\n"
+    "Detection (detect_sql.py) can FLAG a suspicious-looking query.\n"
     "Prevention (parameterized queries) makes the attack structurally\n"
     "IMPOSSIBLE regardless of what the input looks like — this is why both\n"
     "layers matter, and why real systems should never rely on detection\n"

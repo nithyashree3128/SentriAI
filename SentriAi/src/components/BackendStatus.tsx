@@ -1,13 +1,13 @@
-import type { HealthStatus } from '../types'
+type HealthState = 'checking' | 'online' | 'offline'
 
 interface BackendStatusProps {
-  status: HealthStatus
+  status: HealthState
 }
 
-const copy: Record<HealthStatus, string> = {
-  checking: 'Checking backend…',
-  online: 'Backend connected',
-  offline: 'Backend offline',
+const copy: Record<HealthState, string> = {
+  checking: 'Checking Backend…',
+  online: 'Backend Online',
+  offline: 'Backend Offline',
 }
 
 export default function BackendStatus({ status }: BackendStatusProps) {

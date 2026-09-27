@@ -1,9 +1,11 @@
+import csv
+import io
 import json
 import time
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -30,6 +32,23 @@ class QueryRequest(BaseModel):
 class QueryResponse(BaseModel):
     prediction: str
     confidence: float
+
+
+class BatchRequest(BaseModel):
+    queries: list[str] = Field(min_length=1, max_length=1000, description="List of SQL queries to analyze")
+
+
+class BatchResultItem(BaseModel):
+    query: str
+    prediction: str
+    confidence: float
+
+
+class BatchResponse(BaseModel):
+    total_queries: int
+    injections_detected: int
+    legitimate_queries: int
+    results: list[BatchResultItem]
 
 
 class HistoryItem(BaseModel):
@@ -116,3 +135,98 @@ def detect_query(payload: QueryRequest):
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except FileNotFoundError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/detect/batch", response_model=BatchResponse)
+def detect_batch(payload: BatchRequest):
+    """Analyze multiple SQL queries provided as a JSON list."""
+    results: list[BatchResultItem] = []
+    injections = 0
+    legitimate = 0
+
+    for raw_q in payload.queries:
+        q_str = str(raw_q).strip()
+        if not q_str:
+            continue
+        try:
+            verdict, conf = detect_sql_injection(q_str)
+        except Exception:
+            verdict, conf = "ERROR", 0.0
+
+        if verdict == "SQL INJECTION DETECTED":
+            injections += 1
+        elif verdict == "LEGITIMATE QUERY":
+            legitimate += 1
+
+        results.append(BatchResultItem(
+            query=q_str,
+            prediction=verdict,
+            confidence=round(float(conf), 2)
+        ))
+
+    return BatchResponse(
+        total_queries=len(results),
+        injections_detected=injections,
+        legitimate_queries=legitimate,
+        results=results
+    )
+
+
+@app.post("/detect/file", response_model=BatchResponse)
+async def detect_file(file: UploadFile = File(...)):
+    """
+    Analyze queries from an uploaded file (.txt, .sql, or .csv).
+    - .txt / .sql: one query per non-empty line
+    - .csv: searches for a column named 'query', 'sql_query', 'Sentence', or 'data'
+    """
+    filename = file.filename or ""
+    suffix = Path(filename).suffix.lower()
+
+    if suffix not in (".txt", ".sql", ".csv"):
+        raise HTTPException(
+            status_code=400,
+            detail="Unsupported file format. Please upload a .txt, .sql, or .csv file."
+        )
+
+    content_bytes = await file.read()
+    try:
+        text_content = content_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        try:
+            text_content = content_bytes.decode("latin-1")
+        except UnicodeDecodeError as exc:
+            raise HTTPException(status_code=400, detail="Could not decode file content as text.") from exc
+
+    extracted_queries: list[str] = []
+
+    if suffix in (".txt", ".sql"):
+        for line in text_content.splitlines():
+            line_str = line.strip()
+            if line_str and not line_str.startswith("--"):
+                extracted_queries.append(line_str)
+    elif suffix == ".csv":
+        reader = csv.DictReader(io.StringIO(text_content))
+        if not reader.fieldnames:
+            raise HTTPException(status_code=400, detail="CSV file appears to be empty or malformed.")
+
+        # Find target column
+        candidate_cols = ["query", "sql_query", "sentence", "data"]
+        target_col = None
+        for col in reader.fieldnames:
+            if col.strip().lower() in candidate_cols:
+                target_col = col
+                break
+
+        if not target_col:
+            # Fall back to first column
+            target_col = reader.fieldnames[0]
+
+        for row in reader:
+            val = row.get(target_col, "")
+            if val and val.strip():
+                extracted_queries.append(val.strip())
+
+    if not extracted_queries:
+        raise HTTPException(status_code=400, detail="No SQL queries found in uploaded file.")
+
+    return detect_batch(BatchRequest(queries=extracted_queries[:1000]))

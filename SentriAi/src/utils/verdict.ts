@@ -6,17 +6,40 @@ import type { VerdictTier } from '../types'
  * the backend is always displayed verbatim alongside it.
  */
 export function normalizeVerdict(prediction: string): VerdictTier {
+  if (!prediction) return 'unknown'
   const value = prediction.trim().toLowerCase()
 
-  if (['safe', 'benign', 'clean', 'legitimate', 'normal', 'clear'].includes(value)) {
-    return 'safe'
-  }
-  if (['suspicious', 'warning', 'possible', 'anomalous'].includes(value)) {
-    return 'suspicious'
-  }
-  if (['malicious', 'injection', 'sqli', 'attack', 'unsafe'].includes(value)) {
+  if (
+    value.includes('injection') ||
+    value.includes('malicious') ||
+    value.includes('sqli') ||
+    value.includes('attack') ||
+    value.includes('threat') ||
+    value.includes('unsafe')
+  ) {
     return 'malicious'
   }
+
+  if (
+    value.includes('legitimate') ||
+    value.includes('safe') ||
+    value.includes('clean') ||
+    value.includes('benign') ||
+    value.includes('normal') ||
+    value.includes('clear')
+  ) {
+    return 'safe'
+  }
+
+  if (
+    value.includes('suspicious') ||
+    value.includes('warning') ||
+    value.includes('possible') ||
+    value.includes('anomalous')
+  ) {
+    return 'suspicious'
+  }
+
   return 'unknown'
 }
 
@@ -26,12 +49,13 @@ export function normalizeVerdict(prediction: string): VerdictTier {
  * underlying figure it represents.
  */
 export function normalizeConfidencePercent(confidence: number): number {
-  const raw = confidence <= 1 ? confidence * 100 : confidence
+  if (typeof confidence !== 'number' || isNaN(confidence)) return 0
+  const raw = confidence <= 1 && confidence > 0 ? confidence * 100 : confidence
   return Math.max(0, Math.min(100, raw))
 }
 
 export const verdictLabels: Record<VerdictTier, string> = {
-  safe: 'Clear',
+  safe: 'Legitimate',
   suspicious: 'Suspicious',
   malicious: 'Malicious',
   unknown: 'Unclassified',

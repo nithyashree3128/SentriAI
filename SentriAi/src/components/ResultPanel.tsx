@@ -1,60 +1,60 @@
-import type { DetectResponse } from '../types'
-import { normalizeConfidencePercent, normalizeVerdict, verdictLabels } from '../utils/verdict'
-import ConfidenceGauge from './ConfidenceGauge'
+import { AlertTriangle } from 'lucide-react';
+import type { DetectionResult } from '../types';
 
-interface ResultPanelProps {
-  result: DetectResponse
-}
-
-const KNOWN_KEYS = new Set(['prediction', 'confidence'])
-
-function formatKey(key: string): string {
-  return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-}
-
-function formatValue(value: unknown): string {
-  if (value === null || value === undefined) return '—'
-  if (typeof value === 'object') return JSON.stringify(value)
-  return String(value)
-}
-
-export default function ResultPanel({ result }: ResultPanelProps) {
-  const tier = normalizeVerdict(result.prediction)
-  const percent = normalizeConfidencePercent(result.confidence)
-
-  // Anything beyond prediction/confidence is rendered generically, so the
-  // UI can pick up new backend fields later without a rebuild — but it
-  // never invents fields the response doesn't actually contain.
-  const extraFields = Object.entries(result).filter(([key]) => !KNOWN_KEYS.has(key))
-
+export function ResultPanel({ result }: { result: DetectionResult }) {
+  const isMalicious = result.status === 'malicious';
   return (
-    <div className={`result result--${tier}`}>
-      <div className="result__verdict">
-        <span className="result__eyebrow">Verdict</span>
-        <div className="result__prediction">
-          <span className={`result__dot result__dot--${tier}`} />
-          {result.prediction}
+    <div className={`rounded-2xl border p-6 sm:p-8 shadow-2xl animate-slide-up ${isMalicious ? 'bg-rose-950/10 border-rose-500/40' : 'bg-emerald-950/10 border-emerald-500/40'}`}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800/80">
+        <div className="flex items-center gap-4">
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl ${isMalicious ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}`}>
+            {isMalicious ? '🔴' : '🟢'}
+          </div>
+          <div>
+            <h4 className="text-xl font-bold text-white">{result.result || (isMalicious ? 'SQL INJECTION DETECTED' : 'LEGITIMATE QUERY')}</h4>
+            <p className="text-sm text-slate-400 mt-0.5">Confidence: <strong className="text-white">{result.confidence}%</strong></p>
+          </div>
         </div>
-        <span className="result__tier-label">{verdictLabels[tier]} classification</span>
+        <span className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider ${isMalicious ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'}`}>
+          Risk Level: {result.threatLevel}
+        </span>
       </div>
 
-      <div className="result__gauge">
-        <ConfidenceGauge percent={percent} tier={tier} />
-      </div>
-
-      {extraFields.length > 0 && (
-        <div className="result__extra">
-          <span className="result__eyebrow">Additional details</span>
-          <dl className="result__extra-list">
-            {extraFields.map(([key, value]) => (
-              <div key={key} className="result__extra-row">
-                <dt>{formatKey(key)}</dt>
-                <dd>{formatValue(value)}</dd>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+        <div className="space-y-3">
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Detected Indicators</span>
+          <div className="space-y-2">
+            {result.indicators?.map((ind, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs text-slate-200 bg-[#12141c] p-2.5 rounded-lg border border-slate-800">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span>{ind}</span>
               </div>
             ))}
-          </dl>
+          </div>
+
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block pt-2">Analyzed Query Structure</span>
+          <div className="p-3 rounded-lg bg-[#0a0c12] font-mono text-xs text-cyan-300 border border-slate-800 break-words whitespace-pre-wrap">
+            {result.normalizedQuery || result.query}
+          </div>
         </div>
-      )}
+
+        <div className="space-y-4">
+          <div>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Analysis Explanation</span>
+            <p className="text-sm text-slate-300 bg-[#12141c] p-4 rounded-xl border border-slate-800 mt-1 leading-relaxed">
+              {result.explanation}
+            </p>
+          </div>
+          <div>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Remediation Recommendation</span>
+            <p className="text-sm text-slate-300 bg-[#12141c] p-4 rounded-xl border border-slate-800 mt-1 leading-relaxed">
+              {result.recommendation}
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
+
+export default ResultPanel;
